@@ -1,17 +1,25 @@
+require 'csv'
+
+#makes secret debug mode (so run the file with ' debug after')
+debug = ARGV[0] == "debug"
+ARGV.clear
+
 class WordGuess
   def initialize(debug = false)
     # are we in debug mode?
     @debug = debug
 
+    @words = get_words
+
     # possible words, selected at random
-    @words = {
-      "e" => %w(dog cat bug hat cap lit kin fan fin fun tan ten tin ton),
-      "m" => %w(plain claim brine crime alive bride skine drive slime stein jumpy),
-      "h" => %w(
-          machiavellian prestidigitation plenipotentiary quattuordecillion
-          magnanimous unencumbered bioluminescent circumlocution
-        )
-    }
+    # @words = {
+    #   "e" => %w(dog cat bug hat cap lit kin fan fin fun tan ten tin ton),
+    #   "m" => %w(plain claim brine crime alive bride skine drive slime stein jumpy),
+    #   "h" => %w(
+    #       machiavellian prestidigitation plenipotentiary quattuordecillion
+    #       magnanimous unencumbered bioluminescent circumlocution
+    #     )
+    # }
 
     # players attempts allowed by difficulty
     @tries = {
@@ -23,7 +31,7 @@ class WordGuess
     # ask the user to set the game mode
     mode = set_mode
 
-    @word    = @words[mode].sample # chosen word; players try to guess this
+    @word    = @words[mode].sample.downcase # chosen word; players try to guess this
     @guesses = @tries[mode] # how many tries the player gets
     @user_word = "•" * @word.length # a "blank word" for user output
     @guessed = [] # keep track of letters that have been guessed
@@ -39,6 +47,16 @@ class WordGuess
 
     # start the first turn
     play_turn
+  end
+  @words = {}
+
+  def get_words
+    words = {}
+    word_file = CSV.open("words.csv")
+    word_file.each do |line|
+      words[line[0]] = line[1..-1]
+    end
+    return words
   end
 
   def play_turn
@@ -131,4 +149,4 @@ class WordGuess
   end
 end
 
-WordGuess.new
+WordGuess.new(debug)
